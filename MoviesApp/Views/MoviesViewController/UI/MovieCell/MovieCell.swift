@@ -40,10 +40,9 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
         setupView()
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        
-        setupView()
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func configureView() {
