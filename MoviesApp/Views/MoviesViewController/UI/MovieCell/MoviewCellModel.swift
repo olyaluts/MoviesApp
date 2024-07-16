@@ -10,14 +10,18 @@ typealias TapHandler = (() -> Void)
 
 final class MoviewCellModel: GenericCollectionViewModel {
     let id: Int?
-//    let image: String?
     let title: String
+    let image: String?
     
     var tapHandler: TapHandler?
     
     init(movie: Movie) {
         self.id = movie.id
-//        self.image = movie.
         self.title = movie.title
+        if let imageString = movie.posterPath {
+            self.image = "https://image.tmdb.org/t/p/w500\(imageString)"
+        } else {
+            self.image = nil
+        }
     }
 }

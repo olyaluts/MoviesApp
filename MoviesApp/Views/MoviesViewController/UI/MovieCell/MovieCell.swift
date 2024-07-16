@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SDWebImage
 
 final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
     private lazy var imageView: UIImageView = {
@@ -48,12 +49,10 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
     override func configureView() {
         guard let viewModel = viewModel else { return }
         
-//        if let urlString = viewModel.image, let url = URL(string: urlString) {
-//            imageView.imageFrom(url: url)
-//        }
-        
+        if let urlString = viewModel.image, let url = URL(string: urlString) {
+            imageView.sd_setImage(with: url)
+        }
         titleLabel.text = viewModel.title
-        
     }
     
     private func setupView() {
