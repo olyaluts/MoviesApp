@@ -97,7 +97,10 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
             loadMore: loadMore.eraseToAnyPublisher(),
             reload: reload.eraseToAnyPublisher()
         )
-       
+        viewModel.isLoadingPublisher
+            .drive(subscriber: loading)
+            .store(in: &cancellables)
+        
         viewModel.isLoadingPublisher
             .sink { isLoading in
                 if !isLoading {

@@ -16,6 +16,14 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
+    
+    private lazy var titleBackgroundView: UIView = {
+        let view = UIView(frame: .zero)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .white
+        view.alpha = 0.9
+        return view
+    }()
         
     private lazy var titleLabel: UILabel = {
         let label = UILabel(frame: .zero)
@@ -58,6 +66,7 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
     
     private func setupView() {
         contentView.addSubview(imageView)
+        contentView.addSubview(titleBackgroundView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(genreLabel)
         contentView.addSubview(ratingLabel)
@@ -68,10 +77,15 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            titleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
+            titleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            titleBackgroundView.heightAnchor.constraint(equalToConstant: 40),
             
+            titleLabel.centerYAnchor.constraint(equalTo: titleBackgroundView.centerYAnchor, constant: 0),
+            titleLabel.leadingAnchor.constraint(equalTo: titleBackgroundView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: titleBackgroundView.trailingAnchor, constant: -16),
+
             genreLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
             genreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             
@@ -81,6 +95,9 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(actionClicked))
         contentView.addGestureRecognizer(tapGestureRecognizer)
+        
+        titleBackgroundView.layer.cornerRadius = 5
+        titleBackgroundView.clipsToBounds = true
     }
 
     @objc private func actionClicked() {

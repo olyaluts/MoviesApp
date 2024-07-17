@@ -55,7 +55,7 @@ final class MoviesArchitectorDataSource: CollectionViewArchitectorDataSource, RX
                 section.layoutSectionProvider = { _, _ in
                     let itemLayoutSize = NSCollectionLayoutSize(
                         widthDimension: .fractionalWidth(1),
-                        heightDimension: .absolute(400)
+                        heightDimension: .absolute(600)
                     )
                     let item = NSCollectionLayoutItem(layoutSize: itemLayoutSize)
                     let groupLayoutSize = itemLayoutSize
