@@ -36,10 +36,13 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         searchbar.placeholder = "Search your movies"
         return searchbar
     }()
+    
+    private var lastContentOffset: Double = 0.0
 
     private var cancellables: Set<AnyCancellable> = []
     @Published private var isLoaded: Bool = false
     @Published private var searchText: String = ""
+   
     private let loadMore = PassthroughSubject<Void, Never>()
     private let reload = PassthroughSubject<Void, Never>()
     
@@ -97,9 +100,6 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
             loadMore: loadMore.eraseToAnyPublisher(),
             reload: reload.eraseToAnyPublisher()
         )
-        viewModel.isLoadingPublisher
-            .drive(subscriber: loading)
-            .store(in: &cancellables)
         
         viewModel.isLoadingPublisher
             .sink { isLoading in
@@ -121,10 +121,10 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }
     
     private func showError() {
-        let alert = UIAlertController(title: "Error",
-                                      message: "Oops.. Something went wrong",
+        let alert = UIAlertController(title: "Error".localized(),
+                                      message: "Oops.. Something went wrong".localized(),
                                       preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default,
+        alert.addAction(UIAlertAction(title: "Ok".localized(), style: .default,
                                       handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
@@ -135,17 +135,16 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         searchText = searchBar.text ?? ""
     }
     
-    
     // MARK: - Scroll view delegate
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
-
-        if offsetY > contentHeight - height * 2 {
-            loadMore.send(())
+        let contentYoffset = scrollView.contentOffset.y
+        let distanceFromBottom = scrollView.contentSize.height - contentYoffset
+        if distanceFromBottom < height {
+            loadMore.send()
         }
+        lastContentOffset = contentYoffset
     }
     
     @objc private func refreshData() {

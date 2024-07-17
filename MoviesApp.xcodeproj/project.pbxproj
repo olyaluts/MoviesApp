@@ -42,6 +42,7 @@
 		9A380B7E2C4418E400BAD4A1 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A380B7D2C4418E400BAD4A1 /* LoadingView.swift */; };
 		9A380B802C441B2600BAD4A1 /* Publisher+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A380B7F2C441B2600BAD4A1 /* Publisher+Extension.swift */; };
 		9A5655F72C467D6C000B7768 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 9A5655F62C467D6C000B7768 /* SDWebImage */; };
+		9A5655FC2C48477C000B7768 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5655FB2C48477C000B7768 /* String.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,6 +99,7 @@
 		9A380B792C44188C00BAD4A1 /* LoadingSubscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingSubscriber.swift; sourceTree = "<group>"; };
 		9A380B7D2C4418E400BAD4A1 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		9A380B7F2C441B2600BAD4A1 /* Publisher+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+Extension.swift"; sourceTree = "<group>"; };
+		9A5655FB2C48477C000B7768 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +211,7 @@
 		9A380B3E2C44004D00BAD4A1 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				9A5655FB2C48477C000B7768 /* String.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -466,6 +469,7 @@
 				9A380B4D2C44018D00BAD4A1 /* CellProviderContext.swift in Sources */,
 				9A380B5F2C4402AE00BAD4A1 /* MoviesArchitectorDataSource.swift in Sources */,
 				9A380B452C4400F500BAD4A1 /* CollectionViewGenericType.swift in Sources */,
+				9A5655FC2C48477C000B7768 /* String.swift in Sources */,
 				9A380B3D2C44003000BAD4A1 /* RXErrorHandler.swift in Sources */,
 				9A380B5B2C44025F00BAD4A1 /* MoviesBuilder.swift in Sources */,
 				9A380B532C4401E600BAD4A1 /* MoviesCoorinator.swift in Sources */,

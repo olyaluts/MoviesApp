@@ -35,13 +35,14 @@ final class MovieViewModelImpl: MovieViewModel {
         let builder: MoviesBuilder
     }
     
-    let navigationTitle: String = "Popular Movies"
+    let navigationTitle: String = "Popular Movies".localized()
     
     let isLoadingPublisher: BoolPublisher
     private let loadingSubject: PassthroughSubject<Bool, Never>
     
-    let startPageNumber: Int = 1
-    var pageNumber: Int = 1
+    private let startPageNumber: Int = 1
+    private var pageNumber: Int = 1
+    private var currentMovies = CurrentValueSubject<[Movie], Never>([])
     
     private let errorHandler = RXErrorHandler()
     var errorPublisher: AnyPublisher<Error, Never> { errorHandler.errorPublisher }
@@ -60,12 +61,11 @@ final class MovieViewModelImpl: MovieViewModel {
                               loadMore: VoidPublisher,
                               reload: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never> {
         
-        func loadMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Never> {
-            context.service.searchMovies(searchString: searchString,
-                                         pageNumber: pageNumber)
-            .replaceError(with: nil,
-                          errorHandler: errorHandler)
-            .eraseToAnyPublisher()
+        func loadMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie], Never> {
+            context.service.searchMovies(searchString: searchString, pageNumber: pageNumber)
+                .replaceError(with: [])
+                .compactMap { $0 }
+                .eraseToAnyPublisher()
         }
         
         func map(movies: [Movie]) -> [MovieCellModelType] {
@@ -75,46 +75,68 @@ final class MovieViewModelImpl: MovieViewModel {
         
         let loadingStartedPublisher = input.searchString
             .filter { !$0.isEmpty }
-            .handleEvents(receiveOutput: { _ in self.loadingSubject.send(true) })
-            .flatMap { [weak self] searchString -> AnyPublisher<[Movie]?, Never> in
+            .handleEvents(receiveOutput: { [weak self] _ in
                 self?.pageNumber = self?.startPageNumber ?? 1
-                return loadMovies(searchString: searchString, pageNumber: self?.startPageNumber ?? 1)
+                self?.loadingSubject.send(true)
+                self?.currentMovies.send([])
+            })
+            .flatMap { [weak self] searchString -> AnyPublisher<[Movie], Never> in
+                guard let self = self else { return Just([]).eraseToAnyPublisher() }
+                return loadMovies(searchString: searchString, pageNumber: self.startPageNumber)
+                    .handleEvents(receiveOutput: { newMovies in
+                        self.currentMovies.send(newMovies)
+                    })
+                    .eraseToAnyPublisher()
             }
+            .eraseToAnyPublisher()
         
         var loadMoreIsLoading = false
         let loadMorePublisher = input.loadMore
             .filter { !loadMoreIsLoading }
-            .flatMap { [weak self] _ -> AnyPublisher<[Movie]?, Never> in
+            .combineLatest(input.searchString)
+            .handleEvents(receiveOutput: { _ in
                 loadMoreIsLoading = true
-                return loadMovies(searchString: "", pageNumber: self?.pageNumber ?? 1)
+                self.loadingSubject.send(true)
+            })
+            .flatMap { [weak self] (_, searchString) -> AnyPublisher<[Movie], Never> in
+                guard let self = self else { return Just([]).eraseToAnyPublisher() }
+                return loadMovies(searchString: searchString, pageNumber: self.pageNumber)
+                    .handleEvents(receiveOutput: { newMovies in
+                        self.currentMovies.send(self.currentMovies.value + newMovies)
+                        self.pageNumber += 1
+                        self.loadingSubject.send(false)
+                        loadMoreIsLoading = false
+                    })
+                    .eraseToAnyPublisher()
             }
+            .eraseToAnyPublisher()
         
         let reloadPublisher = input.reload
-                .combineLatest(input.searchString)
-                .handleEvents(receiveOutput: { _ in
-                    self.pageNumber = self.startPageNumber
-                    self.loadingSubject.send(true)
-                })
-                .flatMap { (_, searchString) in
-                    loadMovies(searchString: searchString, pageNumber: self.startPageNumber)
-                }
-                .eraseToAnyPublisher()
-            
-    let itemsPublisher = Publishers.Merge3(loadingStartedPublisher, loadMorePublisher, reloadPublisher)
-                .map { result -> [Movie]? in
-                    guard let result = result else { return nil }
-                    return result
-                }
-                .eraseToAnyPublisher()
+            .combineLatest(input.searchString)
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.pageNumber = self?.startPageNumber ?? 1
+                self?.loadingSubject.send(true)
+                self?.currentMovies.send([])
+            })
+            .flatMap { (_, searchString) -> AnyPublisher<[Movie], Never> in
+                loadMovies(searchString: searchString, pageNumber: self.startPageNumber)
+                    .handleEvents(receiveOutput: { newMovies in
+                        self.currentMovies.send(newMovies)
+                    })
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+        
+        let itemsPublisher = Publishers.Merge3(loadingStartedPublisher, loadMorePublisher, reloadPublisher)
+            .eraseToAnyPublisher()
         
         return itemsPublisher
-            .map { data -> [MovieCellModelType] in
-                self.pageNumber += 1
-                return map(movies: data ?? [])
+            .map { [weak self] _ in
+                guard let self = self else { return [] }
+                return map(movies: self.currentMovies.value)
             }
-            .handleEvents(receiveOutput: { _ in
-                loadMoreIsLoading = false
-                self.loadingSubject.send(false)
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.loadingSubject.send(false)
             })
             .eraseToAnyPublisher()
     }
