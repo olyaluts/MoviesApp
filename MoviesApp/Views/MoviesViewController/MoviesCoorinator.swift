@@ -29,8 +29,9 @@ final class MoviesCoorinator {
         let context = MovieViewModelImpl.ServiceContext(service: MovieService(networkClient: NetworkClient()),
                                                         builder: MoviesBuilderImpl())
         
-        let handlers = MovieViewModelImpl.Handlers { id in
-            
+        let handlers = MovieViewModelImpl.Handlers { [weak self] id in
+            guard let self = self else {return}
+            self.showDetails(id: id)
         }
         
 
@@ -39,5 +40,9 @@ final class MoviesCoorinator {
 
         let vc = Inject.ViewControllerHost(MoviesViewController(with: viewModel))
         return vc
+    }
+    
+    private func showDetails(id: String) {
+        //TODO: show details
     }
 }

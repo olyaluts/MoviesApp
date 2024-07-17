@@ -15,6 +15,8 @@ final class MovieService {
     init(networkClient: NetworkClient) {
         self.networkClient = networkClient
     }
+    
+// TODO: we should add cache here 
     func searchMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Error> {
         Future<[Movie]?, Error> { [weak self] promise in
             guard let self = self else { return }
