@@ -26,7 +26,7 @@ final class MoviesCoorinator {
     // MARK: Private methods
 
     private func createLandingViewController() -> UIViewController {
-        let context = MovieViewModelImpl.ServiceContext(service: MovieService(),
+        let context = MovieViewModelImpl.ServiceContext(service: MovieService(networkClient: NetworkClient()),
                                                         builder: MoviesBuilderImpl())
         
         let handlers = MovieViewModelImpl.Handlers { id in

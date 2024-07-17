@@ -9,8 +9,14 @@ import Foundation
 import UIKit
 import Combine
 
-final class MoviesViewController: UIViewController, UISearchBarDelegate, LoadingPresentable {
+final class MoviesViewController: UIViewController, UISearchBarDelegate, LoadingPresentable, UIScrollViewDelegate, UICollectionViewDelegate {
     private var viewModel: MovieViewModelImpl!
+    
+    private lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        return refreshControl
+    }()
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewLayout())
@@ -18,15 +24,16 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         collectionView.backgroundColor = .white
        
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.contentInset = .init(top: 0, left: 0, bottom: 72.0, right: 0)
+        collectionView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
+        collectionView.refreshControl = refreshControl
     
-
         return collectionView
     }()
     
     private var searchBar: UISearchBar = {
         let searchbar = UISearchBar(frame: .zero)
         searchbar.translatesAutoresizingMaskIntoConstraints = false
+        searchbar.placeholder = "Search your movies"
         return searchbar
     }()
 
@@ -34,6 +41,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     @Published private var isLoaded: Bool = false
     @Published private var searchText: String = ""
     private let loadMore = PassthroughSubject<Void, Never>()
+    private let reload = PassthroughSubject<Void, Never>()
     
     private lazy var collectionViewArchitector = CollectionViewArchitectorImpl(collectionView: self.collectionView)
     private lazy var dataSource = MoviesArchitectorDataSource(architector: self.collectionViewArchitector)
@@ -64,6 +72,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     // MARK: - View helpers
 
     private func setupView() {
+        navigationItem.title = viewModel.navigationTitle
         view.addSubview(searchBar)
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
@@ -77,28 +86,67 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
         collectionView.collectionViewLayout = dataSource.collectionViewLayout
+        collectionView.delegate = self
         searchBar.delegate = self
         view.backgroundColor = .white
-    }
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchText = searchBar.text ?? ""
     }
 
     private func setupBindings() {
         let input = (
             searchString: $searchText.eraseToAnyPublisher(),
-            loadMore: loadMore.eraseToAnyPublisher()
+            loadMore: loadMore.eraseToAnyPublisher(),
+            reload: reload.eraseToAnyPublisher()
         )
+       
+        viewModel.isLoadingPublisher
+            .sink { isLoading in
+                if !isLoading {
+                    self.refreshControl.endRefreshing()
+                }
+            }
+            .store(in: &cancellables)
         
         viewModel.cellModels(input)
             .drive(subscriber: dataSource.dataSubscriber)
             .store(in: &cancellables)
         
         viewModel.errorPublisher
-            .sink { _ in
-              
+            .sink { [weak self] _ in
+                self?.showError()
             }
             .store(in: &cancellables)
+    }
+    
+    private func showError() {
+        let alert = UIAlertController(title: "Error",
+                                      message: "Oops.. Something went wrong",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default,
+                                      handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    // MARK: - Search bar delegate
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchText = searchBar.text ?? ""
+    }
+    
+    
+    // MARK: - Scroll view delegate
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+
+        if offsetY > contentHeight - height * 2 {
+            loadMore.send(())
+        }
+    }
+    
+    @objc private func refreshData() {
+        refreshControl.beginRefreshing()
+        reload.send(())
     }
 }

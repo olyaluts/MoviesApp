@@ -54,7 +54,6 @@ protocol NetworkProtocol {
 }
 
 final class NetworkClient: NetworkProtocol {
-    static let shared = NetworkClient()
     
     private let apiKey: String
     private let accessToken: String
@@ -64,7 +63,7 @@ final class NetworkClient: NetworkProtocol {
         return Session(configuration: configuration)
     }()
     
-    private init() {
+    init() {
         self.apiKey = "3e94646835c0f74e064bbb359641e9d6"
         self.accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZTk0NjQ2ODM1YzBmNzRlMDY0YmJiMzU5NjQxZTlkNiIsIm5iZiI6MTcyMDk1NzYxOC4yMzM1NDUsInN1YiI6IjY2OTI5ZTcwMzdkZGVmYmIyZGY3YjA3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.dk0WqQAsbKUt6__-9Gm7xGwplDp7DDE2_VoSThGF-no"
     }
