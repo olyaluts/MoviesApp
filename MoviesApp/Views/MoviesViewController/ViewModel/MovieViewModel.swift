@@ -59,7 +59,6 @@ final class MovieViewModelImpl: MovieViewModel {
     
     func cellModels(_ input: (searchString: StringPublisher,
                                   loadMore: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never> {
-
             func loadMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Never> {
                 context.service.searchMovies(searchString: searchString, pageNumber: pageNumber)
                     .replaceError(with: nil)
@@ -105,55 +104,4 @@ final class MovieViewModelImpl: MovieViewModel {
                 })
                 .eraseToAnyPublisher()
         }
-
-//    func cellModels(_ input: (loaded: BoolPublisher,
-//                              loadMore: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never> {
-////        var reload = input.reload
-//        
-//        func loadMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Never> {
-//            context.service.searchMovies(searchString: searchString, pageNumber: pageNumber)
-//                .replaceError(with: nil)
-//                .eraseToAnyPublisher()
-//        }
-//
-//        func map(movies: [Movie]) -> [MovieCellModelType] {
-//            context.builder.set(movies: movies)
-//            return context.builder.build()
-//        }
-//        
-//        let loadingStartedPublisher = input.loaded
-//            .filter { $0 == true }
-////            .merge(with: input.reload.map { true })
-//            .handleEvents(receiveOutput: { self.loadingSubject.send($0) })
-//            .flatMap { [weak self] _ -> AnyPublisher<[Movie]?, Never> in
-//                loadMovies(searchString: "", pageNumber: self?.startPageNumber ?? 0)
-//            }
-//
-//        var loadMoreIsLoading = false
-//        let loadMorePublisher = input.loadMore
-//            .filter { !loadMoreIsLoading }
-//            .flatMap { [weak self] _ -> AnyPublisher<[Movie]?, Never> in
-//                loadMoreIsLoading = true
-//                return loadMovies(searchString: "", pageNumber: self?.startPageNumber ?? 0)
-//            }
-//
-//        let itemsPublisher = Publishers.Merge(loadingStartedPublisher, loadMorePublisher)
-//            .map { result -> [Movie] in
-//                guard let result = result
-//                else { return ([]) }
-//                return (result)
-//            }
-//            .eraseToAnyPublisher()
-//
-//        return itemsPublisher
-//            .map { data -> [MovieCellModelType] in
-//                self.pageNumber = self.pageNumber + 1
-//                return map(movies: data)
-//            }
-//            .handleEvents(receiveOutput: { _ in
-//                loadMoreIsLoading = false
-//                self.loadingSubject.send(false)
-//            })
-//            .eraseToAnyPublisher()
-//    }
 }

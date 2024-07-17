@@ -32,7 +32,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
 
     private var cancellables: Set<AnyCancellable> = []
     @Published private var isLoaded: Bool = false
-    @Published private var searchText: String = "" 
+    @Published private var searchText: String = ""
     private let loadMore = PassthroughSubject<Void, Never>()
     
     private lazy var collectionViewArchitector = CollectionViewArchitectorImpl(collectionView: self.collectionView)
@@ -95,36 +95,10 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
             .drive(subscriber: dataSource.dataSubscriber)
             .store(in: &cancellables)
         
-//        let input = (
-//            loaded: $isLoaded.eraseToAnyPublisher(),
-//            loadMore: loadMore.eraseToAnyPublisher()
-//        )
-//        
-//        viewModel.cellModels(input)
-//            .drive(subscriber: dataSource.dataSubscriber)
-//            .store(in: &cancellables)
-        
-//        viewModel.cellModels(input)
-//            .sink { items in
-//                if items.count > 0 {
-//                    self.dataSource.set(data: items)
-//                } else {
-//                    self.collectionView.isHidden = true
-//                    self.emptyView.setNeedsLayout()
-//                    self.emptyView.layoutIfNeeded()
-//                    self.emptyView.isHidden = false
-//                }
-//            }
-//            .store(in: &cancellables)
-//
-//        viewModel.isLoadingPublisher
-//            .drive(subscriber: loading)
-//            .store(in: &cancellables)
-
-//        viewModel.errorPublisher
-//            .sink { [weak snackView] _ in
-//                snackView?.show()
-//            }
-//            .store(in: &cancellables)
+        viewModel.errorPublisher
+            .sink { _ in
+              
+            }
+            .store(in: &cancellables)
     }
 }
