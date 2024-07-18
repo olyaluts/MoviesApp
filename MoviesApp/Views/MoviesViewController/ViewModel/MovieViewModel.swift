@@ -8,12 +8,8 @@
 import Foundation
 import Combine
 
-typealias BoolPublisher = AnyPublisher<Bool, Never>
-typealias VoidPublisher = AnyPublisher<Void, Never>
-typealias StringPublisher = AnyPublisher<String, Never>
-
 enum MovieCellModelType {
-    case Movie([MoviewCellModel])
+    case movie([MoviewCellModel])
 }
 
 protocol MovieViewModel {

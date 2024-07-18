@@ -10,14 +10,14 @@ import UIKit
 import SDWebImage
 
 final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
-    private lazy var imageView: UIImageView = {
+    private let imageView: UIImageView = {
         let imageView = UIImageView(frame: .zero)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    private lazy var titleBackgroundView: UIView = {
+    private let titleBackgroundView: UIView = {
         let view = UIView(frame: .zero)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
@@ -25,20 +25,20 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
         return view
     }()
         
-    private lazy var titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         return label
     }()
     
-    private lazy var genreLabel: UILabel = {
+    private let genreLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private lazy var ratingLabel: UILabel = {
+    private let ratingLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

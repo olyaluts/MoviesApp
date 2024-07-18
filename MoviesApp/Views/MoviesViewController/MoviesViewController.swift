@@ -22,15 +22,15 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewLayout())
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.backgroundColor = .white
-       
+        
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
         collectionView.refreshControl = refreshControl
-    
+        
         return collectionView
     }()
     
-    private var searchBar: UISearchBar = {
+    private let searchBar: UISearchBar = {
         let searchbar = UISearchBar(frame: .zero)
         searchbar.translatesAutoresizingMaskIntoConstraints = false
         searchbar.placeholder = "Search your movies"
@@ -38,11 +38,11 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }()
     
     private var lastContentOffset: Double = 0.0
-
+    
     private var cancellables: Set<AnyCancellable> = []
     @Published private var isLoaded: Bool = false
     @Published private var searchText: String = ""
-   
+    
     private let loadMore = PassthroughSubject<Void, Never>()
     private let reload = PassthroughSubject<Void, Never>()
     
@@ -50,7 +50,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     private lazy var dataSource = MoviesArchitectorDataSource(architector: self.collectionViewArchitector)
     
     // MARK: - Init
-
+    
     init(with viewModel: MovieViewModelImpl) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -62,10 +62,10 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }
     
     // MARK: - View lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         collectionViewArchitector.dataSource = dataSource
         setupView()
         setupBindings()
@@ -73,7 +73,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }
     
     // MARK: - View helpers
-
+    
     private func setupView() {
         navigationItem.title = viewModel.navigationTitle
         view.addSubview(searchBar)
@@ -93,7 +93,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         searchBar.delegate = self
         view.backgroundColor = .white
     }
-
+    
     private func setupBindings() {
         let input = (
             searchString: $searchText.eraseToAnyPublisher(),
@@ -121,11 +121,13 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }
     
     private func showError() {
-        let alert = UIAlertController(title: "Error".localized(),
-                                      message: "Oops.. Something went wrong".localized(),
-                                      preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok".localized(), style: .default,
-                                      handler: nil))
+        let alert = UIAlertController(
+            title: "Error".localized(),
+            message: "Oops.. Something went wrong".localized(),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(
+            title: "Ok".localized(), style: .default,
+            handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
     

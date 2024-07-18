@@ -21,8 +21,9 @@ final class MoviesArchitectorDataSource: CollectionViewArchitectorDataSource, RX
     private weak var architector: CollectionViewArchitector?
     
     lazy var collectionViewLayout: UICollectionViewLayout = {
-        let layout = UICollectionViewCompositionalLayout { [weak self] (index: Int,
-                                                                        environment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+        let layout = UICollectionViewCompositionalLayout { [weak self] (
+            index: Int,
+            environment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             self?.sectionFor(index: index, environment: environment)
         }
         
@@ -40,7 +41,10 @@ final class MoviesArchitectorDataSource: CollectionViewArchitectorDataSource, RX
         
         data.forEach { cellModels in
             switch cellModels {
-            case let .Movie(models):
+            case let .movie(models):
+                let sectionInset: CGFloat = 12
+                let itemHeight: CGFloat = 600
+                
                 let moduleContexts: [CellProviderContext] = models.map { cellModel in
                     let context = CellProviderContextImpl<MovieCell>(cellModel: cellModel)
                     context.didSelectHandler = {}
@@ -55,19 +59,20 @@ final class MoviesArchitectorDataSource: CollectionViewArchitectorDataSource, RX
                 section.layoutSectionProvider = { _, _ in
                     let itemLayoutSize = NSCollectionLayoutSize(
                         widthDimension: .fractionalWidth(1),
-                        heightDimension: .absolute(600)
+                        heightDimension: .absolute(itemHeight)
                     )
                     let item = NSCollectionLayoutItem(layoutSize: itemLayoutSize)
                     let groupLayoutSize = itemLayoutSize
-                    let group =  NSCollectionLayoutGroup.horizontal(layoutSize: groupLayoutSize,
-                                                                    repeatingSubitem: item,
-                                                                    count: 1)
+                    let group =  NSCollectionLayoutGroup.horizontal(
+                        layoutSize: groupLayoutSize,
+                        repeatingSubitem: item,
+                        count: 1)
                     group.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
                     
                     let section = NSCollectionLayoutSection(group: group)
-                    section.contentInsets.leading = 12
-                    section.contentInsets.trailing = 12
-                    section.interGroupSpacing = 12
+                    section.contentInsets.leading = sectionInset
+                    section.contentInsets.trailing = sectionInset
+                    section.interGroupSpacing = sectionInset
                     return section
                 }
                 sections.append(section)

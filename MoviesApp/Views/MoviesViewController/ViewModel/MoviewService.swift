@@ -16,14 +16,19 @@ final class MovieService {
         self.networkClient = networkClient
     }
     
-// TODO: we should add cache here 
+    // TODO: we should add cache here
+    
     func searchMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Error> {
         Future<[Movie]?, Error> { [weak self] promise in
             guard let self = self else { return }
             let url = "\(baseUrl)/search/movie"
             let parameters = ["query": searchString,
                               "page": pageNumber]
-            self.networkClient.request(url, method: .get, parameters: parameters, headers: nil) { (result: Result<MoviesResponse, Error>) in
+            self.networkClient.request(
+                url, method: .get,
+                parameters: parameters,
+                headers: nil)
+            { (result: Result<MoviesResponse, Error>) in
                 switch result {
                 case .success(let moviesResponse):
                     promise(.success(moviesResponse.results))

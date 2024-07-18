@@ -37,7 +37,7 @@ final class MoviesBuilderImpl: MoviesBuilder {
             }
             moviesModels.append(cellModel)
         }
-        types.append(MovieCellModelType.Movie(moviesModels))
+        types.append(MovieCellModelType.movie(moviesModels))
         sections = types
         
         return types
