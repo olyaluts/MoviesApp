@@ -8,43 +8,6 @@
 import Foundation
 import Alamofire
 
-//protocol AlamofireNetworkProtocol: AnyObject {
-//    var session: Session { get }
-//    func getPopularMovies(completion: @escaping (Result<[Movie], Error>) -> Void)
-//}
-//
-//final class NetworkClient: AlamofireNetworkProtocol {
-//    static let shared = NetworkClient()
-//    
-//    private let apiKey = "3e94646835c0f74e064bbb359641e9d6"
-//    private let accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZTk0NjQ2ODM1YzBmNzRlMDY0YmJiMzU5NjQxZTlkNiIsIm5iZiI6MTcyMDk1NzYxOC4yMzM1NDUsInN1YiI6IjY2OTI5ZTcwMzdkZGVmYmIyZGY3YjA3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.dk0WqQAsbKUt6__-9Gm7xGwplDp7DDE2_VoSThGF-no"
-//    
-//    private let baseUrl = "https://api.themoviedb.org/3/movie"
-//    
-//    private(set) lazy var session: Session = {
-//           let configuration = URLSessionConfiguration.default
-//           return Session(configuration: configuration)
-//       }()
-//    
-//    func getPopularMovies(completion: @escaping (Result<[Movie], Error>) -> Void) {
-//            let url = "\(baseUrl)/popular"
-//            let headers: HTTPHeaders = [
-//                "Authorization": "Bearer \(accessToken)",
-//                "Content-Type": "application/json;charset=utf-8"
-//            ]
-//            let parameters: Parameters = ["api_key": apiKey]
-//            
-//            session.request(url, method: .get, parameters: parameters, headers: headers).responseDecodable(of: MoviesResponse.self) { response in
-//                switch response.result {
-//                case .success(let moviesResponse):
-//                    completion(.success(moviesResponse.results))
-//                case .failure(let error):
-//                    completion(.failure(error))
-//                }
-//            }
-//        }
-//}
-
 protocol NetworkProtocol {
     func request<T: Decodable>(_ url: String, 
                                method: HTTPMethod,

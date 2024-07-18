@@ -8,6 +8,20 @@
 import Foundation
 import UIKit
 import Inject
+import Swinject
+
+
+// MARK: - Dependency Injection Container
+
+let container = Container { container in
+    container.register(NetworkProtocol.self) { _ in
+        NetworkClient() as NetworkProtocol
+    }
+    container.register(MovieService.self) { resolver in
+        let networkClient = resolver.resolve(NetworkProtocol.self)!
+        return MovieService(networkClient: networkClient)
+    }
+}
 
 final class MoviesCoorinator {
     var navigationController: UINavigationController
@@ -26,8 +40,12 @@ final class MoviesCoorinator {
     // MARK: Private methods
 
     private func createLandingViewController() -> UIViewController {
-        let context = MovieViewModelImpl.ServiceContext(service: MovieService(networkClient: NetworkClient()),
-                                                        builder: MoviesBuilderImpl())
+       
+        let movieService = container.resolve(MovieService.self)!
+               let context = MovieViewModelImpl.ServiceContext(service: movieService,
+                                                               builder: MoviesBuilderImpl())
+//        let context = MovieViewModelImpl.ServiceContext(service: MovieService(networkClient: NetworkClient()),
+//                                                        builder: MoviesBuilderImpl())
         
         let handlers = MovieViewModelImpl.Handlers { [weak self] id in
             guard let self = self else {return}

@@ -10,9 +10,9 @@ import Combine
 
 final class MovieService {
     private let networkClient: NetworkProtocol
-    private let baseUrl = "https://api.themoviedb.org/3"
+    private let baseUrl = App.configuration.baseURL
     
-    init(networkClient: NetworkClient) {
+    init(networkClient: NetworkProtocol) {
         self.networkClient = networkClient
     }
     
