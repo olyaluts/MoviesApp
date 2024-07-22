@@ -61,4 +61,24 @@ final class MovieService {
                 }
             }.eraseToAnyPublisher()
         }
+    
+    func loadGenres() -> AnyPublisher<[Genre]?, Error> {
+            Future<[Genre]?, Error> { [weak self] promise in
+                guard let self = self else { return }
+                let url = "\(baseUrl)/genre/movie/list"
+                self.networkClient.request(
+                    url,
+                    method: .get,
+                    parameters: nil)
+                { (result: Result<[Genre], Error>) in
+                    switch result {
+                    case .success(let genres):
+                        promise(.success(genres))
+                        
+                    case .failure(let error):
+                        promise(.failure(error))
+                    }
+                }
+            }.eraseToAnyPublisher()
+        }
 }
