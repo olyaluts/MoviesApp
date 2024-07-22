@@ -25,9 +25,9 @@ final class MovieService {
             let parameters = ["query": searchString,
                               "page": pageNumber]
             self.networkClient.request(
-                url, method: .get,
-                parameters: parameters,
-                headers: nil)
+                url, 
+                method: .get,
+                parameters: parameters)
             { (result: Result<MoviesResponse, Error>) in
                 switch result {
                 case .success(let moviesResponse):
