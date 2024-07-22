@@ -18,25 +18,47 @@ final class MovieService {
     
     // TODO: we should add cache here
     
-    func searchMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Error> {
-        Future<[Movie]?, Error> { [weak self] promise in
-            guard let self = self else { return }
-            let url = "\(baseUrl)/search/movie"
-            let parameters = ["query": searchString,
-                              "page": pageNumber]
-            self.networkClient.request(
-                url, 
-                method: .get,
-                parameters: parameters)
-            { (result: Result<MoviesResponse, Error>) in
-                switch result {
-                case .success(let moviesResponse):
-                    promise(.success(moviesResponse.results))
-                    
-                case .failure(let error):
-                    promise(.failure(error))
+//    func searchMovies(searchString: String, pageNumber: Int) -> AnyPublisher<[Movie]?, Error> {
+//        Future<[Movie]?, Error> { [weak self] promise in
+//            guard let self = self else { return }
+//            let url = "\(baseUrl)/search/movie"
+//            let parameters = ["query": searchString,
+//                              "page": pageNumber]
+//            self.networkClient.request(
+//                url, 
+//                method: .get,
+//                parameters: parameters)
+//            { (result: Result<MoviesResponse, Error>) in
+//                switch result {
+//                case .success(let moviesResponse):
+//                    promise(.success(moviesResponse.results))
+//                    
+//                case .failure(let error):
+//                    promise(.failure(error))
+//                }
+//            }
+//        }.eraseToAnyPublisher()
+//    }
+    
+    func searchMovies(searchString: String, pageNumber: Int) -> AnyPublisher<Page<Movie>?, Error> {
+            Future<Page<Movie>?, Error> { [weak self] promise in
+                guard let self = self else { return }
+                let url = "\(baseUrl)/search/movie"
+                let parameters = ["query": searchString,
+                                  "page": pageNumber]
+                self.networkClient.request(
+                    url,
+                    method: .get,
+                    parameters: parameters)
+                { (result: Result<Page<Movie>, Error>) in
+                    switch result {
+                    case .success(let page):
+                        promise(.success(page))
+                        
+                    case .failure(let error):
+                        promise(.failure(error))
+                    }
                 }
-            }
-        }.eraseToAnyPublisher()
-    }
+            }.eraseToAnyPublisher()
+        }
 }
