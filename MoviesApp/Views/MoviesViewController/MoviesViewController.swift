@@ -33,7 +33,6 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     private let searchBar: UISearchBar = {
         let searchbar = UISearchBar(frame: .zero)
         searchbar.translatesAutoresizingMaskIntoConstraints = false
-        searchbar.placeholder = "Search your movies"
         return searchbar
     }()
     
@@ -76,6 +75,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     
     private func setupView() {
         navigationItem.title = viewModel.navigationTitle
+        searchBar.placeholder = viewModel.placeholder
         view.addSubview(searchBar)
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([

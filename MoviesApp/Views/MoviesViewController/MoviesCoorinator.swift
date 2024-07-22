@@ -44,9 +44,6 @@ final class MoviesCoorinator {
         let movieService = container.resolve(MovieService.self)!
                let context = MovieViewModelImpl.ServiceContext(service: movieService,
                                                                builder: MoviesBuilderImpl())
-//        let context = MovieViewModelImpl.ServiceContext(service: MovieService(networkClient: NetworkClient()),
-//                                                        builder: MoviesBuilderImpl())
-        
         let handlers = MovieViewModelImpl.Handlers { [weak self] id in
             guard let self = self else {return}
             self.showDetails(id: id)
