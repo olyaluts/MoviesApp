@@ -36,6 +36,18 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         return searchbar
     }()
     
+    private lazy var actionSheet: UIAlertController = {
+        let actionSheet = UIAlertController(
+            title: viewModel.actionTitle,
+            message: nil,
+            preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(
+            title: NSLocalizedString("cancel",
+                                     comment: "Cancel"),
+            style: .cancel, handler: nil))
+        return actionSheet
+    }()
+    
     private var lastContentOffset: Double = 0.0
     
     private var cancellables: Set<AnyCancellable> = []
@@ -81,7 +93,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         let genresButton = UIBarButtonItem(
             title: "Genres",
             style: .plain,
-            target: self, 
+            target: self,
             action: #selector(showGenres))
         navigationItem.rightBarButtonItem = genresButton
         
@@ -128,6 +140,20 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
                 self?.showError()
             }
             .store(in: &cancellables)
+        
+        viewModel.loadGenres(loaded: $isLoaded.eraseToAnyPublisher())
+            .sink { [weak self] genres in
+                genres.forEach({ genre in
+                    self?.actionSheet.addAction(UIAlertAction(
+                        title: genre.name,
+                        style: .default,
+                        handler: { [weak self] _ in
+                            self?.viewModel.selectedGenreId = genre.id
+                            self?.discover.send(())
+                        }))
+                })
+            }
+            .store(in: &cancellables)
     }
     
     private func showError() {
@@ -136,7 +162,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
             message: NSLocalizedString("errorMessage", comment: "Oops.. Something went wrong"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
-            title: NSLocalizedString("OK", comment: "OK"), 
+            title: NSLocalizedString("OK", comment: "OK"),
             style: .default,
             handler: nil))
         self.present(alert, animated: true, completion: nil)
@@ -166,23 +192,6 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }
     
     @objc private func showGenres() {
-        let actionSheet = UIAlertController(
-            title: viewModel.actionTitle,
-            message: nil,
-            preferredStyle: .actionSheet)
-        viewModel.genres.value.forEach({ [weak self] genre in
-            actionSheet.addAction(UIAlertAction(
-                title: genre.name,
-                style: .default,
-                handler: { [weak self] _ in
-                    self?.viewModel.selectedGenreId = genre.id
-                    self?.discover.send(())
-                }))
-        })
-        actionSheet.addAction(UIAlertAction(
-            title: NSLocalizedString("cancel",
-                                     comment: "Cancel"),
-            style: .cancel, handler: nil))
         present(actionSheet, animated: true, completion: nil)
     }
 }

@@ -49,11 +49,9 @@ final class MovieViewModelImpl: MovieViewModel {
     private let context: ServiceContext
     private var pagination: Pagination
     
-    var genres = CurrentValueSubject<[Genre], Never>([])
+    private var genres = CurrentValueSubject<[Genre], Never>([])
     var selectedGenreId: Int?
-    
-    private var cancellables: Set<AnyCancellable> = []
-    
+
     init(context: ServiceContext, handlers: Handlers) {
         self.context = context
         context.builder.set(movieTap: handlers.openDetails)
@@ -62,16 +60,13 @@ final class MovieViewModelImpl: MovieViewModel {
         isLoadingPublisher = loadingSubject.eraseToAnyPublisher()
         
         pagination = Pagination(itemsPerPage: 20, totalItems: 0)
-        
-        loadGenres()
     }
     
-    func loadGenres() {
+    func loadGenres(loaded: BoolPublisher) -> AnyPublisher<[Genre], Never>  {
         context.service.loadGenres()
-            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] genres in
-                self?.genres.send(genres ?? [])
-            })
-            .store(in: &cancellables)
+            .replaceError(with: nil)
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
     
     func cellModels(_ input: (searchString: StringPublisher,
@@ -79,46 +74,34 @@ final class MovieViewModelImpl: MovieViewModel {
                               reload: VoidPublisher,
                               discover: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never> {
         
-        func loadMovies(
-            searchString: String,
-            pageNumber: Int)
-        -> AnyPublisher<Page<Movie>, Never> {
+        func loadMovies(searchString: String, pageNumber: Int) -> AnyPublisher<Page<Movie>, Never> {
             context.service.searchMovies(searchString: searchString, pageNumber: pageNumber)
                 .replaceError(with: nil)
                 .compactMap { $0 }
                 .eraseToAnyPublisher()
         }
         
-        func discoverMovies(
-            genreId: Int)
-        -> AnyPublisher<Page<Movie>, Never> {
+        func discoverMovies(genreId: Int) -> AnyPublisher<Page<Movie>, Never> {
             context.service.discoverMovies(selectedGenre: genreId)
                 .replaceError(with: nil)
                 .compactMap { $0 }
                 .eraseToAnyPublisher()
         }
         
-        func map(
-            movies: [Movie])
-        -> [MovieCellModelType] {
+        func map(movies: [Movie]) -> [MovieCellModelType] {
             context.builder.set(movies: movies)
             return context.builder.build()
         }
         
-        let loadingStartedPublisher = input.searchString
+        let searchPublisher = input.searchString
             .filter { !$0.isEmpty }
             .handleEvents(receiveOutput: { [weak self] _ in
-                self?.pagination.goToFirstPage()
+                self?.pagination.currentPage = 1
                 self?.loadingSubject.send(true)
                 self?.currentMovies.send([])
             })
             .flatMap { [weak self] searchString -> AnyPublisher<Page<Movie>, Never> in
-                guard let self = self else { return Just(Page(
-                    page: 1,
-                    results: [],
-                    totalResults: 0,
-                    totalPages: 0))
-                    .eraseToAnyPublisher() }
+                guard let self = self else { return Just(Page(page: 1, results: [], totalResults: 0, totalPages: 0)).eraseToAnyPublisher() }
                 return loadMovies(searchString: searchString, pageNumber: self.pagination.currentPage)
                     .handleEvents(receiveOutput: { page in
                         self.pagination.totalItems = page.totalResults
@@ -127,53 +110,42 @@ final class MovieViewModelImpl: MovieViewModel {
                     })
                     .eraseToAnyPublisher()
             }
-            .eraseToAnyPublisher()
         
-        var loadMoreIsLoading = false
         let loadMorePublisher = input.loadMore
-            .filter { !loadMoreIsLoading && self.pagination.hasNextPage }
+            .filter { self.pagination.hasNextPage }
             .combineLatest(input.searchString)
-            .handleEvents(receiveOutput: { _ in
-                loadMoreIsLoading = true
-                self.loadingSubject.send(true)
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.loadingSubject.send(true)
             })
             .flatMap { [weak self] (_, searchString) -> AnyPublisher<Page<Movie>, Never> in
-                guard let self = self else { return Just(Page(
-                    page: 1,
-                    results: [],
-                    totalResults: 0,
-                    totalPages: 0)).eraseToAnyPublisher() }
-                self.pagination.goToNextPage()
+                guard let self = self else { return Just(Page(page: 1, results: [], totalResults: 0, totalPages: 0)).eraseToAnyPublisher() }
+                self.pagination.currentPage += 1
                 return loadMovies(searchString: searchString, pageNumber: self.pagination.currentPage)
                     .handleEvents(receiveOutput: { page in
                         self.currentMovies.send(self.currentMovies.value + page.results)
-                        self.loadingSubject.send(false)
-                        loadMoreIsLoading = false
                     })
                     .eraseToAnyPublisher()
             }
-            .eraseToAnyPublisher()
         
         let reloadPublisher = input.reload
             .combineLatest(input.searchString)
             .handleEvents(receiveOutput: { [weak self] _ in
-                self?.pagination.goToFirstPage()
+                self?.pagination.currentPage = 1
                 self?.loadingSubject.send(true)
                 self?.currentMovies.send([])
             })
-            .flatMap { (_, searchString) -> AnyPublisher<Page<Movie>, Never> in
-                loadMovies(searchString: searchString,
-                           pageNumber: self.pagination.currentPage)
-                .handleEvents(receiveOutput: { page in
-                    self.currentMovies.send(page.results)
-                })
-                .eraseToAnyPublisher()
+            .flatMap { [weak self] (_, searchString) -> AnyPublisher<Page<Movie>, Never> in
+                guard let self = self else { return Just(Page(page: 1, results: [], totalResults: 0, totalPages: 0)).eraseToAnyPublisher() }
+                return loadMovies(searchString: searchString, pageNumber: self.pagination.currentPage)
+                    .handleEvents(receiveOutput: { page in
+                        self.currentMovies.send(page.results)
+                    })
+                    .eraseToAnyPublisher()
             }
-            .eraseToAnyPublisher()
         
         let discoverPublisher = input.discover
             .handleEvents(receiveOutput: { [weak self] _ in
-                self?.pagination.goToFirstPage()
+                self?.pagination.currentPage = 1
                 self?.loadingSubject.send(true)
                 self?.currentMovies.send([])
             })
@@ -181,19 +153,15 @@ final class MovieViewModelImpl: MovieViewModel {
                 return self?.selectedGenreId
             }
             .flatMap { [weak self] genreId -> AnyPublisher<Page<Movie>, Never> in
-                guard let self = self else {
-                    return Just(Page(page: 1, results: [], totalResults: 0, totalPages: 0))
-                        .eraseToAnyPublisher()
-                }
+                guard let self = self else { return Just(Page(page: 1, results: [], totalResults: 0, totalPages: 0)).eraseToAnyPublisher() }
                 return discoverMovies(genreId: genreId)
                     .handleEvents(receiveOutput: { page in
                         self.currentMovies.send(page.results)
                     })
                     .eraseToAnyPublisher()
             }
-            .eraseToAnyPublisher()
         
-        let itemsPublisher = Publishers.Merge4(loadingStartedPublisher, loadMorePublisher, reloadPublisher, discoverPublisher)
+        let itemsPublisher = Publishers.Merge4(searchPublisher, loadMorePublisher, reloadPublisher, discoverPublisher)
             .eraseToAnyPublisher()
         
         return itemsPublisher

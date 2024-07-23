@@ -36,29 +36,19 @@ final class Pagination {
         return currentPage > 1
     }
     
-    func goToFirstPage() {
-        currentPage = 1
+    var nextPage: Int? {
+        return (hasNextPage) ? currentPage + 1 : nil
     }
     
-    func goToLastPage() {
-        currentPage = totalPages
+    var firstPage: Int {
+        return 1
     }
     
-    func goToNextPage() {
-        if hasNextPage {
-            currentPage += 1
-        }
+    var lastPage: Int {
+        return totalPages
     }
     
-    func goToPreviousPage() {
-        if hasPreviousPage {
-            currentPage -= 1
-        }
-    }
-    
-    func setPage(_ page: Int) {
-        if page >= 1 && page <= totalPages {
-            currentPage = page
-        }
+    var previousPage: Int {
+        return (hasPreviousPage) ? currentPage - 1 : currentPage
     }
 }

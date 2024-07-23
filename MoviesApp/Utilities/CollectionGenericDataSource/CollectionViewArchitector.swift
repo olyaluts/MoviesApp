@@ -188,26 +188,6 @@ extension CollectionViewArchitectorImpl: UICollectionViewDelegate {
     }
 }
 
-// This is the way to split UIScrollViewDelegate from UICollectionViewDelegate
-extension CollectionViewArchitectorImpl: UIScrollViewDelegate {
-    override func responds(to aSelector: Selector!) -> Bool {
-        let allMethodsDesribed = protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, false, true).types != nil ||
-        protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, true, true).types != nil
-        
-        guard let scrollViewDelegate = scrollViewDelegate, allMethodsDesribed else {
-            return super.responds(to: aSelector)
-        }
-        return scrollViewDelegate.responds(to: aSelector)
-    }
-    
-    override func forwardingTarget(for aSelector: Selector!) -> Any? {
-        let allMethodsDesribed = protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, false, true).types != nil ||
-        protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, true, true).types != nil
-        guard allMethodsDesribed else { return nil }
-        return scrollViewDelegate
-    }
-}
-
 extension NSDiffableDataSourceSnapshot {
     func indexPath(for item: ItemIdentifierType) -> IndexPath? {
         let indexPaths: [IndexPath] = sectionIdentifiers.map { sectionIdentifier -> IndexPath? in
