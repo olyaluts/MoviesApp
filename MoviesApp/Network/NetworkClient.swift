@@ -27,7 +27,6 @@ final class NetworkClient: NetworkProtocol {
     init() {
         if let apiKey = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String {
             self.apiKey = apiKey
-            //"3e94646835c0f74e064bbb359641e9d6"
         } else {
             self.apiKey = nil
         }
