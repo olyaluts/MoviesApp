@@ -8,7 +8,6 @@
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
     var window: UIWindow?
     var moviesCoordinator: MoviesCoorinator?
 
@@ -17,15 +16,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
-
-        let navigationController = UINavigationController()
-        moviesCoordinator = MoviesCoorinator(with: navigationController)
-        moviesCoordinator?.start()
         
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = navigationController
+        moviesCoordinator = MoviesCoorinator(with: window!)
+        moviesCoordinator?.start()
         window?.makeKeyAndVisible()
-        
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -58,7 +53,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Save changes in the application's managed object context when the application transitions to the background.
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
-
-
 }
 

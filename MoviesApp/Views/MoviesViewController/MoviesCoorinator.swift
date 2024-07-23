@@ -10,7 +10,6 @@ import UIKit
 import Inject
 import Swinject
 
-
 // MARK: - Dependency Injection Container
 
 let container = Container { container in
@@ -26,17 +25,20 @@ let container = Container { container in
 }
 
 final class MoviesCoorinator {
-    var navigationController: UINavigationController
+    var window: UIWindow
     
     // MARK: Internal methods
     
-    init(with navigation: UINavigationController) {
-        navigationController = navigation
+    init(with window: UIWindow) {
+        self.window = window
     }
     
+    // MARK: Internal methods
+
     func start() {
         let landingViewController = createLandingViewController()
-        navigationController.pushViewController(landingViewController, animated: true)
+        let navigationController = UINavigationController(rootViewController: landingViewController)
+        window.rootViewController = navigationController
     }
     
     // MARK: Private methods
