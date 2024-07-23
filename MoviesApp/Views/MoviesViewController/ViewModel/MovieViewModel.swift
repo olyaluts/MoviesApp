@@ -19,7 +19,8 @@ protocol MovieViewModel {
     var placeholder: String { get }
     func cellModels(_ input: (searchString: StringPublisher,
                               loadMore: VoidPublisher,
-                              reload: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never>
+                              reload: VoidPublisher,
+                              discover: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never>
 }
 
 final class MovieViewModelImpl: MovieViewModel {
@@ -73,16 +74,31 @@ final class MovieViewModelImpl: MovieViewModel {
     
     func cellModels(_ input: (searchString: StringPublisher,
                               loadMore: VoidPublisher,
-                              reload: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never> {
+                              reload: VoidPublisher,
+                              discover: VoidPublisher)) -> AnyPublisher<[MovieCellModelType], Never> {
         
-        func loadMovies(searchString: String, pageNumber: Int) -> AnyPublisher<Page<Movie>, Never> {
+        func loadMovies(
+            searchString: String,
+            pageNumber: Int)
+        -> AnyPublisher<Page<Movie>, Never> {
             context.service.searchMovies(searchString: searchString, pageNumber: pageNumber)
                 .replaceError(with: nil)
                 .compactMap { $0 }
                 .eraseToAnyPublisher()
         }
         
-        func map(movies: [Movie]) -> [MovieCellModelType] {
+        func discoverMovies(
+            genreId: Int)
+        -> AnyPublisher<Page<Movie>, Never> {
+            context.service.discoverMovies(selectedGenre: genreId)
+                .replaceError(with: nil)
+                .compactMap { $0 }
+                .eraseToAnyPublisher()
+        }
+        
+        func map(
+            movies: [Movie])
+        -> [MovieCellModelType] {
             context.builder.set(movies: movies)
             return context.builder.build()
         }
@@ -146,6 +162,28 @@ final class MovieViewModelImpl: MovieViewModel {
             .flatMap { (_, searchString) -> AnyPublisher<Page<Movie>, Never> in
                 loadMovies(searchString: searchString, 
                            pageNumber: self.pagination.currentPage)
+                .handleEvents(receiveOutput: { page in
+                    self.currentMovies.send(page.results)
+                })
+                .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+        
+        let discoverPublisher = input.discover
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.pagination.goToFirstPage()
+                self?.loadingSubject.send(true)
+                self?.currentMovies.send([])
+            })
+            .compactMap { [weak self] _ -> Int? in
+                return self?.selectedGenreId
+            }
+            .flatMap { [weak self] genreId -> AnyPublisher<Page<Movie>, Never> in
+                guard let self = self else {
+                    return Just(Page(page: 1, results: [], totalResults: 0, totalPages: 0))
+                        .eraseToAnyPublisher()
+                }
+                return discoverMovies(genreId: genreId)
                     .handleEvents(receiveOutput: { page in
                         self.currentMovies.send(page.results)
                     })
@@ -153,7 +191,7 @@ final class MovieViewModelImpl: MovieViewModel {
             }
             .eraseToAnyPublisher()
         
-        let itemsPublisher = Publishers.Merge3(loadingStartedPublisher, loadMorePublisher, reloadPublisher)
+        let itemsPublisher = Publishers.Merge4(loadingStartedPublisher, loadMorePublisher, reloadPublisher, discoverPublisher)
             .eraseToAnyPublisher()
         
         return itemsPublisher

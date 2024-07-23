@@ -44,6 +44,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     
     private let loadMore = PassthroughSubject<Void, Never>()
     private let reload = PassthroughSubject<Void, Never>()
+    private let discover = PassthroughSubject<Void, Never>()
     
     private lazy var collectionViewArchitector = CollectionViewArchitectorImpl(collectionView: self.collectionView)
     private lazy var dataSource = MoviesArchitectorDataSource(architector: self.collectionViewArchitector)
@@ -102,7 +103,8 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         let input = (
             searchString: $searchText.eraseToAnyPublisher(),
             loadMore: loadMore.eraseToAnyPublisher(),
-            reload: reload.eraseToAnyPublisher()
+            reload: reload.eraseToAnyPublisher(),
+            discover: discover.eraseToAnyPublisher()
         )
         
         viewModel.isLoadingPublisher
@@ -163,7 +165,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         for genre in viewModel.genres.value {
             actionSheet.addAction(UIAlertAction(title: genre.name, style: .default, handler: { [weak self] _ in
                 self?.viewModel.selectedGenreId = genre.id
-                self?.reload.send(())
+                self?.discover.send(())
             }))
         }
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))

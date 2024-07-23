@@ -17,7 +17,10 @@ final class MovieService {
     }
     
     // TODO: we should add cache here
-    func searchMovies(searchString: String, pageNumber: Int) -> AnyPublisher<Page<Movie>?, Error> {
+    func searchMovies(
+        searchString: String,
+        pageNumber: Int)
+    -> AnyPublisher<Page<Movie>?, Error> {
         Future<Page<Movie>?, Error> { [weak self] promise in
             guard let self = self else { return }
             let url = "\(baseUrl)/search/movie"
@@ -38,7 +41,8 @@ final class MovieService {
         }.eraseToAnyPublisher()
     }
     
-    func loadGenres() -> AnyPublisher<[Genre]?, Error> {
+    func loadGenres()
+    -> AnyPublisher<[Genre]?, Error> {
         Future<[Genre]?, Error> { [weak self] promise in
             guard let self = self else { return }
             let url = "\(baseUrl)/genre/movie/list"
@@ -50,6 +54,28 @@ final class MovieService {
                 switch result {
                 case .success(let genresResponse):
                     promise(.success(genresResponse.genres))
+                case .failure(let error):
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func discoverMovies(
+        selectedGenre: Int)
+    -> AnyPublisher<Page<Movie>?, Error> {
+        Future<Page<Movie>?, Error> { [weak self] promise in
+            guard let self = self else { return }
+            let url = "\(baseUrl)/discover/movie"
+            let parameters = ["with_genres": selectedGenre]
+            self.networkClient.request(
+                url,
+                method: .get,
+                parameters: parameters)
+            { (result: Result<Page<Movie>, Error>) in
+                switch result {
+                case .success(let page):
+                    promise(.success(page))
                 case .failure(let error):
                     promise(.failure(error))
                 }
