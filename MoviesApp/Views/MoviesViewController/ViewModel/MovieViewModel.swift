@@ -46,6 +46,11 @@ final class MovieViewModelImpl: MovieViewModel {
     private let context: ServiceContext
     private var pagination: Pagination
     
+    var genres = CurrentValueSubject<[Genre], Never>([])
+    var selectedGenreId: Int?
+    
+    private var cancellables: Set<AnyCancellable> = []
+    
     init(context: ServiceContext, handlers: Handlers) {
         self.context = context
         context.builder.set(movieTap: handlers.openDetails)
@@ -54,6 +59,16 @@ final class MovieViewModelImpl: MovieViewModel {
         isLoadingPublisher = loadingSubject.eraseToAnyPublisher()
         
         pagination = Pagination(itemsPerPage: 20, totalItems: 0)
+        
+        loadGenres()
+    }
+    
+    func loadGenres() {
+        context.service.loadGenres()
+            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] genres in
+                self?.genres.send(genres ?? [])
+            })
+            .store(in: &cancellables)
     }
     
     func cellModels(_ input: (searchString: StringPublisher,

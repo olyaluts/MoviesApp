@@ -76,6 +76,10 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     private func setupView() {
         navigationItem.title = viewModel.navigationTitle
         searchBar.placeholder = viewModel.placeholder
+       
+        let genresButton = UIBarButtonItem(title: "Genres", style: .plain, target: self, action: #selector(showGenres))
+               navigationItem.rightBarButtonItem = genresButton
+        
         view.addSubview(searchBar)
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
@@ -152,5 +156,17 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     @objc private func refreshData() {
         refreshControl.beginRefreshing()
         reload.send(())
+    }
+    
+    @objc private func showGenres() {
+        let actionSheet = UIAlertController(title: "Select Genre", message: nil, preferredStyle: .actionSheet)
+        for genre in viewModel.genres.value {
+            actionSheet.addAction(UIAlertAction(title: genre.name, style: .default, handler: { [weak self] _ in
+                self?.viewModel.selectedGenreId = genre.id
+                self?.reload.send(())
+            }))
+        }
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        present(actionSheet, animated: true, completion: nil)
     }
 }

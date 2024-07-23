@@ -46,10 +46,10 @@ final class MovieService {
                 url,
                 method: .get,
                 parameters: nil)
-            { (result: Result<[Genre], Error>) in
+            { (result: Result<GenresResponse, Error>) in
                 switch result {
-                case .success(let genres):
-                    promise(.success(genres))
+                case .success(let genresResponse):
+                    promise(.success(genresResponse.genres))
                 case .failure(let error):
                     promise(.failure(error))
                 }
