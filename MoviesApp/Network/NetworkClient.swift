@@ -53,25 +53,4 @@ final class NetworkClient: NetworkProtocol {
               }
           }
       }
-//    func request<T: Decodable>(_ url: String, method: HTTPMethod, parameters: Parameters?, completion: @escaping (Result<T, Error>) -> Void) {
-//        var allHeaders = HTTPHeaders()
-//        allHeaders.add(name: "Authorization", value: "Bearer \(accessToken)")
-//        allHeaders.add(name: "Content-Type", value: "application/json;charset=utf-8")
-//        
-//        var allParameters = parameters ?? Parameters()
-//        allParameters["api_key"] = apiKey
-//        
-//        session.request(url, method: method, parameters: allParameters, headers: allHeaders).responseDecodable(of: T.self) { response in
-//            switch response.result {
-//            case .success(let result):
-//                completion(.success(result))
-//            case .failure(let error):
-//                completion(.failure(error))
-//            }
-//        }
-//    }
-}
-
-struct MoviesResponse: Decodable {
-    let results: [Movie]
 }

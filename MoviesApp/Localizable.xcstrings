@@ -37,6 +37,42 @@
         }
       }
     },
+    "error" : {
+      "comment" : "Error",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помилка"
+          }
+        }
+      }
+    },
+    "errorMessage" : {
+      "comment" : "Oops.. Something went wrong",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oops.. Something went wrong"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " Ой... щось трапилось"
+          }
+        }
+      }
+    },
     "mainLabel" : {
       "comment" : "Popular Movies",
       "localizations" : {
@@ -50,6 +86,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Популярні фільми"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "comment" : "OK",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }

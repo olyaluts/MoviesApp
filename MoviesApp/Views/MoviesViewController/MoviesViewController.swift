@@ -128,11 +128,12 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     
     private func showError() {
         let alert = UIAlertController(
-            title: "Error".localized(),
-            message: "Oops.. Something went wrong".localized(),
+            title: NSLocalizedString("error", comment: "Error"),
+            message: NSLocalizedString("errorMessage", comment: "Oops.. Something went wrong"),
             preferredStyle: .alert)
         alert.addAction(UIAlertAction(
-            title: "Ok".localized(), style: .default,
+            title: NSLocalizedString("OK", comment: "OK"), 
+            style: .default,
             handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
@@ -175,7 +176,7 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
                 }))
         })
         actionSheet.addAction(UIAlertAction(
-            title: NSLocalizedString("cancel", 
+            title: NSLocalizedString("cancel",
                                      comment: "Cancel"),
             style: .cancel, handler: nil))
         present(actionSheet, animated: true, completion: nil)

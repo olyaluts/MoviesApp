@@ -22,3 +22,7 @@ struct Movie: Decodable {
         case genreIds = "genre_ids"
     }
 }
+
+struct MoviesResponse: Decodable {
+    let results: [Movie]
+}
