@@ -16,7 +16,7 @@ protocol NetworkProtocol {
 }
 
 final class NetworkClient: NetworkProtocol {
-    private let apiKey: String
+    private let apiKey: String?
     private let accessToken: String
     
     private(set) lazy var session: Session = {
@@ -25,10 +25,22 @@ final class NetworkClient: NetworkProtocol {
     }()
     
     init() {
-        self.apiKey = "3e94646835c0f74e064bbb359641e9d6"
+        if let apiKey = Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String {
+            self.apiKey = apiKey
+            //"3e94646835c0f74e064bbb359641e9d6"
+        } else {
+            self.apiKey = nil
+        }
+        // Access token  hardcoded here, with real request it will loaded from API and stored in keychain
         self.accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZTk0NjQ2ODM1YzBmNzRlMDY0YmJiMzU5NjQxZTlkNiIsIm5iZiI6MTcyMDk1NzYxOC4yMzM1NDUsInN1YiI6IjY2OTI5ZTcwMzdkZGVmYmIyZGY3YjA3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.dk0WqQAsbKUt6__-9Gm7xGwplDp7DDE2_VoSThGF-no"
     }
-    private func buildRequest(url: String, method: HTTPMethod, parameters: Parameters?, headers: HTTPHeaders?) -> DataRequest {
+    
+    private func buildRequest(
+        url: String,
+        method: HTTPMethod,
+        parameters: Parameters?,
+        headers: HTTPHeaders?)
+    -> DataRequest {
         var allHeaders = HTTPHeaders()
         allHeaders.add(name: "Authorization", value: "Bearer \(accessToken)")
         allHeaders.add(name: "Content-Type", value: "application/json;charset=utf-8")
@@ -39,7 +51,7 @@ final class NetworkClient: NetworkProtocol {
         return session.request(url, method: method, parameters: allParameters, headers: allHeaders)
     }
     
-    func request<T: Decodable>(_ url: String, 
+    func request<T: Decodable>(_ url: String,
                                method: HTTPMethod,
                                parameters: Parameters?,
                                completion: @escaping (Result<T, Error>) -> Void) {

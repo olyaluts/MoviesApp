@@ -22,3 +22,5 @@ buildServer.json
 iOS-Boutique/.vscode/settings.json
 .vscode
 .vscode/settings.json
+MoviesApp/config.xcconfig
+
