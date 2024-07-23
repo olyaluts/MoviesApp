@@ -36,9 +36,11 @@ final class CollectionViewSectionImpl: CollectionViewSection {
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .estimated(estimatedSize)
         )
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       repeatingSubitem: item,
-                                                       count: 1)
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitem: item,
+            count: 1)
+            
         let section = NSCollectionLayoutSection(group: group)
         return section
     }

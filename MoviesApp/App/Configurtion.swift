@@ -7,13 +7,13 @@
 
 import Foundation
 
-enum EnvironmentType: NSInteger {
+enum EnvironmentType {
     case development
     case staging
     case production
 }
 
-final class Configuration: NSObject {
+final class Configuration {
     public lazy var typeEnvironment: EnvironmentType = {
         #if DEVELOPMENT
             return .development
@@ -22,10 +22,6 @@ final class Configuration: NSObject {
         #else
             return .production
         #endif
-    }()
-
-    public lazy var isTestFlight: Bool = {
-        Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
     }()
 
     public lazy var baseURL: String = {

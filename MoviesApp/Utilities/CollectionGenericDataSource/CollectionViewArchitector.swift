@@ -25,33 +25,33 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
             resetDataSource()
         }
     }
-
+    
     weak var scrollViewDelegate: UIScrollViewDelegate?
-
+    
     // MARK: Private properties
-
+    
     private var diffableDataSource: UICollectionViewDiffableDataSource<ArchitectorSectionID, ArchitectorCellProviderID>?
     private let collectionView: UICollectionView
     private lazy var registeredIdentifiers: Set<String> = []
-
+    
     private var sections: [CollectionViewSection] {
         dataSource?.sections ?? []
     }
-
+    
     private var emptyView: UIView? {
         dataSource?.emptyView
     }
-
+    
     // MARK: Init
-
+    
     init(collectionView: UICollectionView) {
         self.collectionView = collectionView
         super.init()
         collectionView.delegate = self
     }
-
+    
     // MARK: Internal methods
-
+    
     func reload() {
         let snapshot = getSnapshot()
         // Workaround to setup snapshot and then reload it with animation.
@@ -63,7 +63,7 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
             self.diffableDataSource?.apply(snapshot, animatingDifferences: true)
         }
     }
-
+    
     func reload(animated _: Bool, scrollTo item: ArchitectorCellProviderID?) {
         let snapshot = getSnapshot()
         diffableDataSource?.apply(snapshot, animatingDifferences: true, completion: { [weak self] in
@@ -72,7 +72,7 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
             }
         })
     }
-
+    
     func refresh(items: [ArchitectorCellProviderID], animated: Bool) {
         guard let diffableDataSource = diffableDataSource else {
             return
@@ -81,24 +81,35 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
         snapshot.reloadItems(items)
         diffableDataSource.apply(snapshot, animatingDifferences: animated, completion: nil)
     }
-
+    
     func reconfigureItems(items: [ArchitectorCellProviderID]) {
         guard let diffableDataSource = diffableDataSource else {
             return
         }
         var snapshot = diffableDataSource.snapshot()
-        snapshot.reconfigureItems(items)
+        if #available(iOS 15.0, *) {
+            snapshot.reconfigureItems(items)
+        } else {
+            // Fallback for iOS 13
+            items.forEach { item in
+                if let indexPath = snapshot.indexPath(for: item) {
+                    let sectionIdentifier = snapshot.sectionIdentifiers[indexPath.section]
+                    snapshot.deleteItems([item])
+                    snapshot.appendItems([item], toSection: sectionIdentifier)
+                }
+            }
+        }
         diffableDataSource.apply(snapshot, animatingDifferences: true, completion: nil)
     }
-
+    
     func scrollToIndex(index: IndexPath) {
         if collectionView.numberOfSections > 0 {
             collectionView.scrollToItem(at: index, at: .top, animated: true)
         }
     }
-
+    
     // MARK: Private methods
-
+    
     func showEmptyView() {
         guard emptyView?.superview == nil else {
             return
@@ -107,7 +118,7 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
         emptyView.frame = collectionView.bounds
         collectionView.addSubview(emptyView)
     }
-
+    
     private func registerCells() {
         sections.flatMap(\.cellContexts).forEach { context in
             if !registeredIdentifiers.contains(context.cellIdentifier) {
@@ -116,7 +127,7 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
             }
         }
     }
-
+    
     private func registerReusableViews() {
         sections.flatMap(\.supplementaryViewContexts.values).forEach { context in
             if !registeredIdentifiers.contains(context.kind) {
@@ -125,7 +136,7 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
             }
         }
     }
-
+    
     func resetDataSource() {
         diffableDataSource = UICollectionViewDiffableDataSource<ArchitectorSectionID, ArchitectorCellProviderID>(collectionView: collectionView) { [weak self]
             collectionView, indexPath, _ -> UICollectionViewCell? in
@@ -133,16 +144,16 @@ final class CollectionViewArchitectorImpl: NSObject, CollectionViewArchitector {
             let cellProvider = strongSelf.sections[indexPath.section].cellContexts[indexPath.row]
             return cellProvider.dequeueAndConfigure(in: collectionView, at: indexPath)
         }
-
+        
         diffableDataSource?.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath -> UICollectionReusableView? in
             guard let strongSelf = self else { return nil }
             let viewProvider = strongSelf.sections[indexPath.section].supplementaryViewContexts[kind]
             return viewProvider?.dequeueAndConfigure(in: collectionView, at: indexPath)
         }
-
+        
         collectionView.dataSource = diffableDataSource
     }
-
+    
     private func getSnapshot() -> NSDiffableDataSourceSnapshot<ArchitectorSectionID, ArchitectorCellProviderID> {
         registerReusableViews()
         registerCells()
@@ -160,12 +171,12 @@ extension CollectionViewArchitectorImpl: UICollectionViewDelegate {
         let cellProvider = sections[indexPath.section].cellContexts[indexPath.row]
         cellProvider.didSelectHandler?()
     }
-
+    
     func collectionView(_: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let cellProvider = sections[indexPath.section].cellContexts[indexPath.row]
         cellProvider.willDisplayHandler?(cell)
     }
-
+    
     func collectionView(_: UICollectionView, didEndDisplaying _: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard sections.count > indexPath.section,
               sections[indexPath.section].cellContexts.count > indexPath.row
@@ -181,17 +192,17 @@ extension CollectionViewArchitectorImpl: UICollectionViewDelegate {
 extension CollectionViewArchitectorImpl: UIScrollViewDelegate {
     override func responds(to aSelector: Selector!) -> Bool {
         let allMethodsDesribed = protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, false, true).types != nil ||
-            protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, true, true).types != nil
-
+        protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, true, true).types != nil
+        
         guard let scrollViewDelegate = scrollViewDelegate, allMethodsDesribed else {
             return super.responds(to: aSelector)
         }
         return scrollViewDelegate.responds(to: aSelector)
     }
-
+    
     override func forwardingTarget(for aSelector: Selector!) -> Any? {
         let allMethodsDesribed = protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, false, true).types != nil ||
-            protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, true, true).types != nil
+        protocol_getMethodDescription(UIScrollViewDelegate.self, aSelector, true, true).types != nil
         guard allMethodsDesribed else { return nil }
         return scrollViewDelegate
     }
@@ -204,7 +215,7 @@ extension NSDiffableDataSourceSnapshot {
                   let section = sectionIdentifiers.firstIndex(of: sectionIdentifier) else { return nil }
             return IndexPath(row: row, section: section)
         }
-        .compactMap { $0 }
+            .compactMap { $0 }
         return indexPaths.first
     }
 }
