@@ -17,6 +17,7 @@ protocol MovieViewModel {
     var errorPublisher: AnyPublisher<Error, Never> { get }
     var navigationTitle: String { get }
     var placeholder: String { get }
+    var actionTitle: String { get }
     func cellModels(_ input: (searchString: StringPublisher,
                               loadMore: VoidPublisher,
                               reload: VoidPublisher,
@@ -33,8 +34,9 @@ final class MovieViewModelImpl: MovieViewModel {
         let builder: MoviesBuilder
     }
     
-    let navigationTitle: String = "Popular Movies".localized()
-    let placeholder: String = "Search your movies".localized()
+    let navigationTitle: String = NSLocalizedString("mainLabel", comment: "Popular Movies")
+    let placeholder: String = NSLocalizedString("searchPlaceholder", comment: "Search your movies")
+    let actionTitle: String = NSLocalizedString("actionTitle", comment: "Select genre")
     
     let isLoadingPublisher: BoolPublisher
     private let loadingSubject: PassthroughSubject<Bool, Never>
@@ -160,7 +162,7 @@ final class MovieViewModelImpl: MovieViewModel {
                 self?.currentMovies.send([])
             })
             .flatMap { (_, searchString) -> AnyPublisher<Page<Movie>, Never> in
-                loadMovies(searchString: searchString, 
+                loadMovies(searchString: searchString,
                            pageNumber: self.pagination.currentPage)
                 .handleEvents(receiveOutput: { page in
                     self.currentMovies.send(page.results)

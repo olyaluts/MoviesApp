@@ -77,9 +77,9 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     private func setupView() {
         navigationItem.title = viewModel.navigationTitle
         searchBar.placeholder = viewModel.placeholder
-       
+        
         let genresButton = UIBarButtonItem(title: "Genres", style: .plain, target: self, action: #selector(showGenres))
-               navigationItem.rightBarButtonItem = genresButton
+        navigationItem.rightBarButtonItem = genresButton
         
         view.addSubview(searchBar)
         view.addSubview(collectionView)
@@ -161,14 +161,23 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
     }
     
     @objc private func showGenres() {
-        let actionSheet = UIAlertController(title: "Select Genre", message: nil, preferredStyle: .actionSheet)
-        for genre in viewModel.genres.value {
-            actionSheet.addAction(UIAlertAction(title: genre.name, style: .default, handler: { [weak self] _ in
-                self?.viewModel.selectedGenreId = genre.id
-                self?.discover.send(())
-            }))
-        }
-        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        let actionSheet = UIAlertController(
+            title: viewModel.actionTitle,
+            message: nil,
+            preferredStyle: .actionSheet)
+        viewModel.genres.value.forEach({ [weak self] genre in
+            actionSheet.addAction(UIAlertAction(
+                title: genre.name,
+                style: .default,
+                handler: { [weak self] _ in
+                    self?.viewModel.selectedGenreId = genre.id
+                    self?.discover.send(())
+                }))
+        })
+        actionSheet.addAction(UIAlertAction(
+            title: NSLocalizedString("cancel", 
+                                     comment: "Cancel"),
+            style: .cancel, handler: nil))
         present(actionSheet, animated: true, completion: nil)
     }
 }

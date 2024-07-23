@@ -1,0 +1,77 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "actionTitle" : {
+      "comment" : "Select Genre",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Genre"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оберіть жанр"
+          }
+        }
+      }
+    },
+    "cancel" : {
+      "comment" : "Cancel",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відміна"
+          }
+        }
+      }
+    },
+    "mainLabel" : {
+      "comment" : "Popular Movies",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Popular Movies"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Популярні фільми"
+          }
+        }
+      }
+    },
+    "searchPlaceholder" : {
+      "comment" : "Search your movies",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search your movies"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук фільмів"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
