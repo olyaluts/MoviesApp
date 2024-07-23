@@ -14,7 +14,7 @@ enum EnvironmentType {
 }
 
 final class Configuration {
-    public lazy var typeEnvironment: EnvironmentType = {
+    lazy var typeEnvironment: EnvironmentType = {
         #if DEVELOPMENT
             return .development
         #elseif STAGING
@@ -24,7 +24,7 @@ final class Configuration {
         #endif
     }()
 
-    public lazy var baseURL: String = {
+    lazy var baseURL: String = {
         switch typeEnvironment {
         case .development:
             return "developmentURL"
@@ -34,4 +34,8 @@ final class Configuration {
             return "https://api.themoviedb.org/3"
         }
     }()
+    
+    func posterImg(imageString: String) -> String {
+        return "https://image.tmdb.org/t/p/w500\(imageString)"
+    }
 }

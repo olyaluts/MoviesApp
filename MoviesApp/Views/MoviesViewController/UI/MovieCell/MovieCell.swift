@@ -24,7 +24,7 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
         view.alpha = 0.9
         return view
     }()
-        
+    
     private let titleLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -65,6 +65,12 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
     }
     
     private func setupView() {
+        let topPadding: CGFloat = 32
+        let basicPadding: CGFloat = 16
+        let titleBackgroundViewHeight: CGFloat = 40
+        let bottomPadding: CGFloat = 24
+        let titleBackgroundViewCornerRadius: CGFloat = 5
+        
         contentView.addSubview(imageView)
         contentView.addSubview(titleBackgroundView)
         contentView.addSubview(titleLabel)
@@ -77,29 +83,29 @@ final class MovieCell: GenericCollectionViewCellImpl<MoviewCellModel> {
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            titleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
-            titleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            titleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            titleBackgroundView.heightAnchor.constraint(equalToConstant: 40),
+            titleBackgroundView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: topPadding),
+            titleBackgroundView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: basicPadding),
+            titleBackgroundView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -basicPadding),
+            titleBackgroundView.heightAnchor.constraint(equalToConstant: titleBackgroundViewHeight),
             
             titleLabel.centerYAnchor.constraint(equalTo: titleBackgroundView.centerYAnchor, constant: 0),
-            titleLabel.leadingAnchor.constraint(equalTo: titleBackgroundView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: titleBackgroundView.trailingAnchor, constant: -16),
-
-            genreLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
-            genreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleLabel.leadingAnchor.constraint(equalTo: titleBackgroundView.leadingAnchor, constant: basicPadding),
+            titleLabel.trailingAnchor.constraint(equalTo: titleBackgroundView.trailingAnchor, constant: -basicPadding),
+            
+            genreLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -bottomPadding),
+            genreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: basicPadding),
             
             ratingLabel.centerYAnchor.constraint(equalTo: genreLabel.centerYAnchor),
-            ratingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            ratingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -basicPadding),
         ])
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(actionClicked))
         contentView.addGestureRecognizer(tapGestureRecognizer)
         
-        titleBackgroundView.layer.cornerRadius = 5
+        titleBackgroundView.layer.cornerRadius = titleBackgroundViewCornerRadius
         titleBackgroundView.clipsToBounds = true
     }
-
+    
     @objc private func actionClicked() {
         viewModel?.tapHandler?()
     }

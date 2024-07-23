@@ -19,7 +19,7 @@ final class MoviewCellModel: GenericCollectionViewModel {
         self.id = movie.id
         self.title = movie.title
         if let imageString = movie.posterPath {
-            self.image = "https://image.tmdb.org/t/p/w500\(imageString)"
+            self.image = App.configuration.posterImg(imageString: imageString)
         } else {
             self.image = nil
         }
