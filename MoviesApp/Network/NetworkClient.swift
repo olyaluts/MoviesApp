@@ -8,10 +8,22 @@
 import Foundation
 import Alamofire
 
+enum HTTPMethod: String {
+    case get = "GET"
+    case post = "POST"
+    case put = "PUT"
+    case delete = "DELETE"
+    case patch = "PATCH"
+    case head = "HEAD"
+    case options = "OPTIONS"
+    case trace = "TRACE"
+    case connect = "CONNECT"
+}
+
 protocol NetworkProtocol {
     func request<T: Decodable>(_ url: String, 
                                method: HTTPMethod,
-                               parameters: Parameters?,
+                               parameters: [String: Any]?,
                                completion: @escaping (Result<T, Error>) -> Void)
 }
 
@@ -46,13 +58,17 @@ final class NetworkClient: NetworkProtocol {
         
         var allParameters = parameters ?? Parameters()
         allParameters["api_key"] = apiKey
-        
-        return session.request(url, method: method, parameters: allParameters, headers: allHeaders)
+              
+        return session.request(
+            url,
+            method: Alamofire.HTTPMethod(method),
+            parameters: allParameters,
+            headers: allHeaders)
     }
     
     func request<T: Decodable>(_ url: String,
                                method: HTTPMethod,
-                               parameters: Parameters?,
+                               parameters: [String: Any]?,
                                completion: @escaping (Result<T, Error>) -> Void) {
           let request = buildRequest(url: url, method: method, parameters: parameters, headers: nil)
           request.responseDecodable(of: T.self) { response in
@@ -64,4 +80,10 @@ final class NetworkClient: NetworkProtocol {
               }
           }
       }
+}
+
+extension Alamofire.HTTPMethod {
+    init(_ method: HTTPMethod) {
+        self.init(rawValue: method.rawValue)
+    }
 }

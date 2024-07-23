@@ -78,7 +78,11 @@ final class MoviesViewController: UIViewController, UISearchBarDelegate, Loading
         navigationItem.title = viewModel.navigationTitle
         searchBar.placeholder = viewModel.placeholder
         
-        let genresButton = UIBarButtonItem(title: "Genres", style: .plain, target: self, action: #selector(showGenres))
+        let genresButton = UIBarButtonItem(
+            title: "Genres",
+            style: .plain,
+            target: self, 
+            action: #selector(showGenres))
         navigationItem.rightBarButtonItem = genresButton
         
         view.addSubview(searchBar)
